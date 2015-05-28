@@ -2,6 +2,7 @@ from boto.s3 import connect_to_region as s3_connect_to_region
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 from .base import Base
 
+
 class S3(Base):
     def __init__(self, configs):
         self.local_key = 'fakes3'
@@ -29,4 +30,3 @@ class S3(Base):
             return self.conn.get_bucket(bucket_name)
         else:
             return self.conn.create_bucket(bucket_name)
-

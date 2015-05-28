@@ -4,6 +4,7 @@ from boto.dynamodb2.table import Table
 from boto.dynamodb2.fields import HashKey, RangeKey
 from .base import Base
 
+
 class DynamoDB(Base):
     def __init__(self, configs):
         self.local_key = 'dynamodb_local'

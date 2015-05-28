@@ -2,12 +2,12 @@ import pytest
 from pyidxp.aws.s3 import S3
 from boto.s3.connection import OrdinaryCallingFormat
 
+
 class FakeS3Connection:
     __ref__ = None
 
     def __init__(self, region, aws_access_key_id=None,
-        aws_secret_access_key=None,
-        calling_format=None):
+                 aws_secret_access_key=None, calling_format=None):
         self.__class__.__ref__ = self
         self.conn_params = {
             'region': region,
@@ -28,6 +28,7 @@ class FakeS3Connection:
     def create_bucket(self, name):
         return 'Created ' + name
 
+
 class TestS3:
     def get_configs(self):
         return {
@@ -47,7 +48,7 @@ class TestS3:
     @pytest.fixture()
     def mock_fake_connection(self, monkeypatch):
         def mock(access_key, secret_key, is_secure=None, port=None, host=None,
-                                         calling_format=None):
+                 calling_format=None):
             self.fake_conn_params = {
                 'calling_format': calling_format,
             }
@@ -84,4 +85,3 @@ class TestS3:
 
     def test_create_bucket_that_does_not_exist(self):
         assert S3(self.get_configs()).get_bucket('asdasd') == 'Created asdasd'
-

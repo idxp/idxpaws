@@ -1,12 +1,12 @@
 import pytest
 from pyidxp.aws.dynamodb import DynamoDB
 
+
 class FakeDynamoConnection:
     __ref__ = None
 
     def __init__(self, region, aws_access_key_id=None,
-        aws_secret_access_key=None,
-        calling_format=None):
+                 aws_secret_access_key=None, calling_format=None):
         self.__class__.__ref__ = self
         self.conn_params = {
             'region': region,
@@ -22,6 +22,7 @@ class FakeDynamoConnection:
 
     def create_bucket(self, name):
         return 'Created ' + name
+
 
 class TestDynamoDB:
     def get_configs(self):
@@ -87,4 +88,3 @@ class TestDynamoDB:
     def test_create_table_that_does_not_exist(self, mock_created_table):
         table = DynamoDB(self.get_configs()).get_table('asdasd')
         assert table == 'Created asdasd'
-
