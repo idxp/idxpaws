@@ -1,5 +1,5 @@
 import pytest
-from idxpaws.dynamodb import DynamoDB
+from pyidxp.aws.dynamodb import DynamoDB
 
 class FakeDynamoConnection:
     __ref__ = None
@@ -37,7 +37,7 @@ class TestDynamoDB:
     @pytest.fixture(autouse=True)
     def mock_real_connection(self, monkeypatch):
         monkeypatch.setattr(
-            'idxpaws.dynamodb.dynamo_connect_to_region',
+            'pyidxp.aws.dynamodb.dynamo_connect_to_region',
             FakeDynamoConnection
         )
 
@@ -47,7 +47,7 @@ class TestDynamoDB:
                  is_secure=None, port=None, host=None):
             return 'dynamo_fake_conn'
         monkeypatch.setattr(
-            'idxpaws.dynamodb.DynamoDBConnection',
+            'pyidxp.aws.dynamodb.DynamoDBConnection',
             mock
         )
 
@@ -55,13 +55,13 @@ class TestDynamoDB:
     def mock_get_table(self, monkeypatch):
         def mock(name, connection=None):
             return 'Get ' + name
-        monkeypatch.setattr('idxpaws.dynamodb.Table', mock)
+        monkeypatch.setattr('pyidxp.aws.dynamodb.Table', mock)
 
     @pytest.fixture()
     def mock_created_table(self, monkeypatch):
         def mock(name, connection=None, schema=None, throughput=None):
             return 'Created ' + name
-        monkeypatch.setattr('idxpaws.dynamodb.Table.create', mock)
+        monkeypatch.setattr('pyidxp.aws.dynamodb.Table.create', mock)
 
     def test_connect_to_real_dynamo(self):
         configs = self.get_configs()

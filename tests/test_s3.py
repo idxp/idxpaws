@@ -1,5 +1,5 @@
 import pytest
-from idxpaws.s3 import S3
+from pyidxp.aws.s3 import S3
 from boto.s3.connection import OrdinaryCallingFormat
 
 class FakeS3Connection:
@@ -41,7 +41,7 @@ class TestS3:
 
     @pytest.fixture(autouse=True)
     def mock_real_connection(self, monkeypatch):
-        monkeypatch.setattr('idxpaws.s3.s3_connect_to_region',
+        monkeypatch.setattr('pyidxp.aws.s3.s3_connect_to_region',
                             FakeS3Connection)
 
     @pytest.fixture()
@@ -52,7 +52,7 @@ class TestS3:
                 'calling_format': calling_format,
             }
             return 's3_fake_conn'
-        monkeypatch.setattr('idxpaws.s3.S3Connection', mock)
+        monkeypatch.setattr('pyidxp.aws.s3.S3Connection', mock)
 
     def test_connect_to_real_s3(self):
         configs = self.get_configs()
