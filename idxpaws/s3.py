@@ -1,12 +1,11 @@
 from boto.s3 import connect_to_region as s3_connect_to_region
 from boto.s3.connection import S3Connection, OrdinaryCallingFormat
+from .base import Base
 
-class S3:
+class S3(Base):
     def __init__(self, configs):
-        if configs['aws']['fakes3']:
-            self.connect_fake()
-        else:
-            self.connect_real(configs)
+        self.local_key = 'fakes3'
+        self.connect(configs)
 
     def connect_fake(self):
         self.conn = S3Connection(

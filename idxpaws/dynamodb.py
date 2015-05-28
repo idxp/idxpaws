@@ -2,14 +2,12 @@ from boto.dynamodb2 import connect_to_region as dynamo_connect_to_region
 from boto.dynamodb2.layer1 import DynamoDBConnection
 from boto.dynamodb2.table import Table
 from boto.dynamodb2.fields import HashKey, RangeKey
+from .base import Base
 
-class DynamoDB:
+class DynamoDB(Base):
     def __init__(self, configs):
-        if configs['aws']['dynamodb_local']:
-            self.connect_fake()
-        else:
-            self.connect_real(configs)
-
+        self.local_key = 'dynamodb_local'
+        self.connect(configs)
 
     def connect_fake(self):
         self.conn = DynamoDBConnection(
