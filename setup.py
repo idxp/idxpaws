@@ -11,7 +11,7 @@ setup(
     license='LICENSE',
     packages=find_packages(exclude=['tests']),
     install_requires=[
-        'boto'
+        'boto >= 2.36'
     ],
     tests_require=['pytest'],
 )
