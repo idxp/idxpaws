@@ -2,6 +2,7 @@ from boto.dynamodb2 import connect_to_region as dynamo_connect_to_region
 from boto.dynamodb2.layer1 import DynamoDBConnection
 from boto.dynamodb2.table import Table
 from boto.dynamodb2.fields import HashKey, RangeKey
+from time import sleep
 from .base import Base
 
 
@@ -27,8 +28,11 @@ class DynamoDB(Base):
     def get_table(self, table_name):
         if table_name in self.conn.list_tables()['TableNames']:
             return Table(table_name, connection=self.conn)
-        return Table.create(
+        table = Table.create(
             table_name,
             schema=[HashKey('id'), RangeKey('timestamp')],
             throughput={'read': 5, 'write': 15},
             connection=self.conn)
+        while table_name not in self.conn.list_tables()['TableNames']:
+            sleep(2)
+        return table

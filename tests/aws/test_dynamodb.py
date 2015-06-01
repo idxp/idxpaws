@@ -2,28 +2,6 @@ import pytest
 from pyidxp.aws.dynamodb import DynamoDB
 
 
-class FakeDynamoConnection:
-    __ref__ = None
-
-    def __init__(self, region, aws_access_key_id=None,
-                 aws_secret_access_key=None, calling_format=None):
-        self.__class__.__ref__ = self
-        self.conn_params = {
-            'region': region,
-            'access_key': aws_access_key_id,
-            'secret_key': aws_secret_access_key,
-        }
-
-    def list_tables(self):
-        return {'TableNames': ['table1', 'table2']}
-
-    def get_bucket(self, name):
-        return 'Get ' + name
-
-    def create_bucket(self, name):
-        return 'Created ' + name
-
-
 class TestDynamoDB:
     def get_configs(self):
         return {
@@ -37,20 +15,15 @@ class TestDynamoDB:
 
     @pytest.fixture(autouse=True)
     def mock_real_connection(self, monkeypatch):
-        monkeypatch.setattr(
-            'pyidxp.aws.dynamodb.dynamo_connect_to_region',
-            FakeDynamoConnection
-        )
+        monkeypatch.setattr('pyidxp.aws.dynamodb.dynamo_connect_to_region',
+                            FakeDynamoConnection)
 
     @pytest.fixture()
     def mock_fake_connection(self, monkeypatch):
         def mock(aws_access_key_id=None, aws_secret_access_key=None,
                  is_secure=None, port=None, host=None):
             return 'dynamo_fake_conn'
-        monkeypatch.setattr(
-            'pyidxp.aws.dynamodb.DynamoDBConnection',
-            mock
-        )
+        monkeypatch.setattr('pyidxp.aws.dynamodb.DynamoDBConnection', mock)
 
     @pytest.fixture()
     def mock_get_table(self, monkeypatch):
@@ -61,6 +34,7 @@ class TestDynamoDB:
     @pytest.fixture()
     def mock_created_table(self, monkeypatch):
         def mock(name, connection=None, schema=None, throughput=None):
+            connection.tables.append(name)
             return 'Created ' + name
         monkeypatch.setattr('pyidxp.aws.dynamodb.Table.create', mock)
 
@@ -88,3 +62,20 @@ class TestDynamoDB:
     def test_create_table_that_does_not_exist(self, mock_created_table):
         table = DynamoDB(self.get_configs()).get_table('asdasd')
         assert table == 'Created asdasd'
+
+
+class FakeDynamoConnection:
+    __ref__ = None
+
+    def __init__(self, region, aws_access_key_id=None,
+                 aws_secret_access_key=None, calling_format=None):
+        self.__class__.__ref__ = self
+        self.conn_params = {
+            'region': region,
+            'access_key': aws_access_key_id,
+            'secret_key': aws_secret_access_key,
+        }
+        self.tables = ['table1', 'table2']
+
+    def list_tables(self):
+        return {'TableNames': self.tables}

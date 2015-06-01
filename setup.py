@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyidxp',
-    version='0.2.2',
+    version='0.2.3',
     author='Artur Rodrigues, Denis Lins',
     author_email='arturhoo@gmail.com, denis.lins@outlook.com',
     description='pyidxp - simple libs for our everyday needs',
