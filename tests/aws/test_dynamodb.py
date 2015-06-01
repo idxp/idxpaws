@@ -32,11 +32,11 @@ class TestDynamoDB:
         monkeypatch.setattr('pyidxp.aws.dynamodb.Table', mock)
 
     @pytest.fixture()
-    def mock_created_table(self, monkeypatch):
-        def mock(name, connection=None, schema=None, throughput=None):
+    def mock_create_table(self, monkeypatch):
+        def mock_create(name, connection=None, schema=None, throughput=None):
             connection.tables.append(name)
-            return 'Created ' + name
-        monkeypatch.setattr('pyidxp.aws.dynamodb.Table.create', mock)
+            return FakeTable()
+        monkeypatch.setattr('pyidxp.aws.dynamodb.Table.create', mock_create)
 
     def test_connect_to_real_dynamo(self):
         configs = self.get_configs()
@@ -59,9 +59,9 @@ class TestDynamoDB:
         table = DynamoDB(self.get_configs()).get_table('table1')
         assert table == 'Get table1'
 
-    def test_create_table_that_does_not_exist(self, mock_created_table):
+    def test_create_table_that_does_not_exist(self, mock_create_table):
         table = DynamoDB(self.get_configs()).get_table('asdasd')
-        assert table == 'Created asdasd'
+        assert table.__class__ == FakeTable
 
 
 class FakeDynamoConnection:
@@ -79,3 +79,11 @@ class FakeDynamoConnection:
 
     def list_tables(self):
         return {'TableNames': self.tables}
+
+
+class FakeTable:
+    def __init__(self):
+        self.statuses = ['ACTIVE', 'CREATING']
+
+    def describe(self):
+        return {'Table': {'TableStatus': self.statuses.pop()}}

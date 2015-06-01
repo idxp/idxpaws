@@ -21,8 +21,7 @@ python setup.py register
 Generate the archives
 
 ```
-python setup.py sdist
-python setup.py bdist_wheel
+python setup.py sdist bdist_wheel
 ```
 
 Upload them to PyPI

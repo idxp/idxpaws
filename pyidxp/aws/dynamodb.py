@@ -33,6 +33,6 @@ class DynamoDB(Base):
             schema=[HashKey('id'), RangeKey('timestamp')],
             throughput={'read': 5, 'write': 15},
             connection=self.conn)
-        while table_name not in self.conn.list_tables()['TableNames']:
-            sleep(2)
+        while table.describe()['Table']['TableStatus'] != 'ACTIVE':
+            sleep(1)
         return table
