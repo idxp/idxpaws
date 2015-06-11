@@ -22,7 +22,7 @@ class TestDynamoDB:
     def mock_fake_connection(self, monkeypatch):
         def mock(aws_access_key_id=None, aws_secret_access_key=None,
                  is_secure=None, port=None, host=None):
-            return 'dynamo_fake_conn'
+            return FakeDynamoConnection('localhost')
         monkeypatch.setattr('pyidxp.aws.dynamodb.DynamoDBConnection', mock)
 
     @pytest.fixture()
@@ -54,7 +54,8 @@ class TestDynamoDB:
     def test_connect_to_fake_dynamo(self, mock_fake_connection):
         configs = self.get_configs()
         configs['aws']['dynamodb_local'] = True
-        assert DynamoDB(configs).conn == 'dynamo_fake_conn'
+        configs['aws']['region'] = 'localhost'
+        assert DynamoDB(configs).conn.conn_params['region'] == 'localhost'
 
     def test_get_table_that_exists(self, mock_get_table):
         table = DynamoDB(self.get_configs()).get_table('table1')
@@ -65,18 +66,13 @@ class TestDynamoDB:
         assert table.__class__ == FakeTable
 
     def test_update_table(self, mock_create_table):
-        conn = DynamoDB(self.get_configs())
-        table = conn.get_table('table2')
-        conn.update_table(table, {'write': 10, 'read': 10})
+        dynamo = DynamoDB(self.get_configs())
+        table = dynamo.get_table('table2')
+        dynamo.update_table(table, {'write': 10, 'read': 10})
         assert table.throughput == {'write': 10, 'read': 10}
-
-    def test_update_table_local(self):
-        configs = self.get_configs()
-        configs['aws']['dynamodb_local'] = True
-        conn = DynamoDB(configs)
-        table = conn.get_table('table2')
-        conn.update_table(table, {'write': 10, 'read': 10})
-        assert table.throughput == {'write': 5, 'read': 5}
+        dynamo.conn.host = 'localhost'
+        dynamo.update_table(table, {'write': 20, 'read': 20})
+        assert table.throughput == {'write': 10, 'read': 10}
 
 
 class FakeDynamoConnection:
@@ -100,7 +96,7 @@ class FakeDynamoConnection:
 class FakeTable:
     def __init__(self, name, throughput={}):
         self.name = name
-        self.statuses = ['ACTIVE', 'ACTIVE', 'UPDATING', 'ACTIVE', 'CREATING']
+        self.statuses = ['ACTIVE', 'UPDATING'] * 10
         self.throughput = throughput
 
     def describe(self):
