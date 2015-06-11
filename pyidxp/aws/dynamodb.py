@@ -34,5 +34,16 @@ class DynamoDB(Base):
             throughput={'read': 5, 'write': 15},
             connection=self.conn)
         while table.describe()['Table']['TableStatus'] != 'ACTIVE':
-            sleep(1)
+            sleep(2)
         return table
+
+    def update_table(self, table, throughput):
+        if self.conn.host == 'localhost':
+            return
+        self.is_table_active(table)
+        table.update(throughput=throughput)
+        self.is_table_active(table)
+
+    def is_table_active(self, table):
+        while table.describe()['Table']['TableStatus'] != 'ACTIVE':
+            sleep(2)
