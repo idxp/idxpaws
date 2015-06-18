@@ -36,12 +36,11 @@ class DynamoDB(Base):
             schema=[HashKey(keys[0]), RangeKey(keys[1])],
             throughput={'read': 5, 'write': 15},
             connection=self.conn)
-        while table.describe()['Table']['TableStatus'] != 'ACTIVE':
-            sleep(1)
+        self.wait_until_table_is_active(table)
         return table
 
     def update_table(self, table, throughput):
-        if self.conn.host == 'localhost':
+        if self.conn.host == 'localhost' or throughput == table.throughput:
             return
         self.wait_until_table_is_active(table)
         table.update(throughput=throughput)
