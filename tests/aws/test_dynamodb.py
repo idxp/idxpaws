@@ -70,6 +70,8 @@ class TestDynamoDB:
         table = dynamo.get_table('table2')
         dynamo.update_table(table, {'write': 10, 'read': 10})
         assert table.throughput == {'write': 10, 'read': 10}
+        dynamo.update_table(table, {'write': 10, 'read': 10})
+        assert table.throughput == {'write': 10, 'read': 10}
         dynamo.conn.host = 'localhost'
         dynamo.update_table(table, {'write': 20, 'read': 20})
         assert table.throughput == {'write': 10, 'read': 10}
