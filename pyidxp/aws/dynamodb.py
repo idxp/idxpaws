@@ -25,16 +25,19 @@ class DynamoDB(Base):
             aws_access_key_id=configs['aws']['access_key'],
             aws_secret_access_key=configs['aws']['secret_key'])
 
-    def get_table(self, table_name, keys=('id', 'timestamp')):
+    def get_table(self, table_name, hash_key='id', range_key='timestamp',
+                  throughput={'read': 5, 'write': 15}):
         if table_name in self.conn.list_tables()['TableNames']:
             table = Table(table_name, connection=self.conn)
-            # Bug: https://github.com/boto/boto/issues/2826
-            table.describe()
+            table.describe()  # Bug: https://github.com/boto/boto/issues/2826
             return table
+        schema = [HashKey(hash_key)]
+        if range_key:
+            schema.append(RangeKey(range_key))
         table = Table.create(
             table_name,
-            schema=[HashKey(keys[0]), RangeKey(keys[1])],
-            throughput={'read': 5, 'write': 15},
+            schema=schema,
+            throughput=throughput,
             connection=self.conn)
         self.wait_until_table_is_active(table)
         return table
